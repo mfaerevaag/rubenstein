@@ -1,0 +1,20 @@
+#! /usr/bin/env ruby
+
+# The main program
+# If we get an exception, then print it out and keep going (we do NOT want
+# to disconnect unexpectedly!)
+
+require_relative '../src/rubenstein'
+
+rubenstein = Rubenstein.new('trololo.dk', 443, 'rubenstein', '#yogot')
+
+if rubenstein.alive?
+  begin
+    rubenstein.listen
+  rescue Interrupt
+  rescue Exception => detail
+    puts detail.message()
+    print detail.backtrace.join("\n")
+    retry
+  end
+end
