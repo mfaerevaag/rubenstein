@@ -5,11 +5,11 @@ module IRC
   # Connect to the IRC server
   def connect
     @socket = TCPSocket.open(@server, @port)
-    say "USER rubenstein 0 * Rubenstein"
+    say "USER #{@nick} 0 * #{@real_name}"
     say "NICK #{@nick}"
-    identify "themodernprometheus"
+    identify @password
     say "JOIN #{@channel}"
-    say_to @channel, "I'M ALIVE"
+    say_to @channel, @hello
   end
 
   # Send a message to the irc server and print it to the screen
@@ -33,9 +33,9 @@ module IRC
   # Just keep on truckin' until we disconnect
   def listen
     until @socket.eof?
-      read, write = select([@socket, $stdin], nil, nil, nil)
-      next unless read
 
+      msg = @socket.gets
+      puts "MSG: #{msg}"
     end
   end
 end

@@ -6,7 +6,7 @@
 
 require_relative '../src/rubenstein'
 
-rubenstein = Rubenstein.new('trololo.dk', 443, 'rubenstein', '#yogot')
+rubenstein = Rubenstein.new
 
 if rubenstein.alive?
   begin

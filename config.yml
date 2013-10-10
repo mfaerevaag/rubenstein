@@ -1,0 +1,8 @@
+config:
+  server:    trololo.dk
+  port:      443
+  channel:   yogot
+  nick:      rubenstein
+  real_name: Rubenstein
+  password:  themodernprometheus # Change this!
+  hello:     I'M ALIVE
