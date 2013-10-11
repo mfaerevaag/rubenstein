@@ -1,20 +1,31 @@
 require 'socket'
 
 module IRC
+  extend self
 
   # Connect to the IRC server
   def connect
     @socket = TCPSocket.open(@server, @port)
-    @socket.puts "USER #{@nick} 0 * #{@real_name}"
-    @socket.puts "NICK #{@nick}"
+    send :user, @nick, '0', '*', @real_name
+    send :nick, @nick
     identify @password
-    @socket.puts "JOIN #{@channel}"
+    send :join, @channel
     say @hello
   end
 
+  def send(command, *args)
+    str = command.to_s.upcase + ' '
+    args.each do |arg|
+      str += arg.to_s + ' '
+    end
+    str.gsub!(/PRIVMSG #{args[0]} /, "PRIVMSG #{args[0]} :")
+
+    puts "> #{str}"
+    @socket.puts str
+  end
+
   def say_to(recipient, msg)
-    puts "> #{recipient}: #{msg}"
-    @socket.puts "PRIVMSG #{recipient} :#{msg}"
+    send :privmsg, recipient.to_s, msg
   end
 
   def say(msg)
@@ -22,35 +33,16 @@ module IRC
   end
 
   def register(password)
-    say_to "NickServ", "REGISTER #{password}"
+    say_to :nickerv, "REGISTER #{password}"
   end
 
   def identify(password)
-    say_to "NickServ", "IDENTIFY #{password}"
+    say_to :nickserv, "IDENTIFY #{password}"
   end
 
-  def eval(str)
-    prefix = /PRIVMSG #{@channel} :#{@nick}/
-    return unless str =~ prefix
-
-    from = str.match(/^:([a-zA-Z0-9\_\-\\\[\]\{\}\^\`|]*)!/)[0][1..-2]
-
-    str = str.split(prefix)[1]
-    str.sub! /^\W*\s*/, '' # remove colon and whitespaces
-
-    case str.strip
-    when /^ping\s*$/i
-      say "#{from}: pong"
-    else
-      # asdf
-    end
-  end
-
-  def listen
+  def listen(&block)
     until @socket.eof?
-      str = @socket.gets
-      puts str
-      eval(str)
+      yield @socket.gets
     end
   end
 end
