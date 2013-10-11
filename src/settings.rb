@@ -20,11 +20,9 @@ module Settings
     @_settings.each_key do |key|
       @_settings[key] = @_settings[key].symbolize_keys
     end
-    puts @_settings
   end
 
   def method_missing(name, *args, &block)
-    puts "NAME #{name}"
     @_settings[name.to_sym] || fail(NoMethodError, "unknown configuration root #{name}", caller)
   end
 end

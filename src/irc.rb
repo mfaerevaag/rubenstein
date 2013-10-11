@@ -5,21 +5,20 @@ module IRC
   # Connect to the IRC server
   def connect
     @socket = TCPSocket.open(@server, @port)
-    say "USER #{@nick} 0 * #{@real_name}"
-    say "NICK #{@nick}"
+    @socket.puts "USER #{@nick} 0 * #{@real_name}"
+    @socket.puts "NICK #{@nick}"
     identify @password
-    say "JOIN #{@channel}"
-    say_to @channel, @hello
-  end
-
-  # Send a message to the irc server and print it to the screen
-  def say(msg)
-    puts "--> #{msg}"
-    @socket.puts msg
+    @socket.puts "JOIN #{@channel}"
+    say @hello
   end
 
   def say_to(recipient, msg)
-    say "PRIVMSG #{recipient} :#{msg}"
+    puts "> #{recipient}: #{msg}"
+    @socket.puts "PRIVMSG #{recipient} :#{msg}"
+  end
+
+  def say(msg)
+    say_to @channel, msg
   end
 
   def register(password)
@@ -30,12 +29,28 @@ module IRC
     say_to "NickServ", "IDENTIFY #{password}"
   end
 
-  # Just keep on truckin' until we disconnect
+  def eval(str)
+    prefix = /PRIVMSG #{@channel} :#{@nick}/
+    return unless str =~ prefix
+
+    from = str.match(/^:([a-zA-Z0-9\_\-\\\[\]\{\}\^\`|]*)!/)[0][1..-2]
+
+    str = str.split(prefix)[1]
+    str.sub! /^\W*\s*/, '' # remove colon and whitespaces
+
+    case str.strip
+    when /^ping\s*$/i
+      say "#{from}: pong"
+    else
+      # asdf
+    end
+  end
+
   def listen
     until @socket.eof?
-
-      msg = @socket.gets
-      puts "MSG: #{msg}"
+      str = @socket.gets
+      puts str
+      eval(str)
     end
   end
 end
