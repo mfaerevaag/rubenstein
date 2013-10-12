@@ -1,7 +1,6 @@
 require 'socket'
 
 module IRC
-  extend self
 
   # Connect to the IRC server
   def connect
@@ -44,5 +43,9 @@ module IRC
     until @socket.eof?
       yield @socket.gets
     end
+  end
+
+  def filter(str)
+    str.match(/:(?<nick>\w+)!~?(?<user>\w+)@(?<host>.+) (?<command>\w+) (?<arg>[\w#]*) ?:(?<msg>.*)/i)
   end
 end

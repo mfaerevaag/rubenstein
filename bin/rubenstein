@@ -7,10 +7,11 @@
 require_relative '../src/rubenstein'
 
 rubenstein = Rubenstein.new
+rubenstein.connect
 
 if rubenstein.alive?
   begin
-    rubenstein.listen
+    rubenstein.run
   rescue Interrupt
   rescue Exception => detail
     puts detail.message()

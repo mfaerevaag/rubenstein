@@ -2,9 +2,9 @@ require 'YAML'
 
 class Hash
   def symbolize_keys
-    self.inject({}) do |memo, (k,v)|
-      memo[k.to_sym] = v
-      memo
+    self.inject({}) do |hash, (key, value)|
+      hash[key.to_sym] = value
+      hash
     end
   end
 end
@@ -17,12 +17,10 @@ module Settings
 
   def load!(filename)
     @_settings = YAML::load_file(filename).symbolize_keys
-    @_settings.each_key do |key|
-      @_settings[key] = @_settings[key].symbolize_keys
-    end
+    @_settings.each { |key, value| @_settings[key] = value.symbolize_keys }
   end
 
-  def method_missing(name, *args, &block)
-    @_settings[name.to_sym] || fail(NoMethodError, "unknown configuration root #{name}", caller)
+  def method_missing(sym, *args, &block)
+    @_settings[sym] || super
   end
 end
