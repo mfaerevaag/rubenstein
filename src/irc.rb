@@ -1,28 +1,22 @@
 require 'socket'
 
 class IRC
-  attr_accessor :server, :port, :channel, :nick, :real_name, :password
-  attr_accessor :hello, :keep_alive
+  attr_accessor :keep_alive, :settings
 
-  def initialize(params)
-    @server = params[:server]
-    @port = params[:port]
-    @channel = '#' + params[:channel]
-    @nick = params[:nick]
-    @real_name = params[:real_name]
-    @password = params[:password]
-    @hello = params[:hello]
+  def initialize(settings)
+    @settings = settings
+    @settings[:channel].insert(0, '#')
     @keep_alive = true
   end
 
   # connect to the IRC server
   def connect
-    @socket = TCPSocket.open(@server, @port)
-    send :user, "#{@nick} 0 * #{@real_name}"
-    send :nick, @nick
-    identify @password
-    send :join, @channel
-    say @hello
+    @socket = TCPSocket.open(@settings[:server], @settings[:port])
+    send :user, "#{@settings[:nick]} 0 * #{@settings[:real_name]}"
+    send :nick, @settings[:nick]
+    identify @settings[:password]
+    send :join, @settings[:channel]
+    say @settings[:hello]
 
     !@socket.nil?
   end
@@ -44,21 +38,21 @@ class IRC
 
   # send privmsg to channel
   def say(msg)
-    say_to @channel, msg
+    say_to @settings[:channel], msg
   end
 
   # register with nickserv
   def register(password)
-    say_to :nickerv, "REGISTER #{password}"
+    say_to :nickerv, "REGISTER #{settings[:password]}"
   end
 
   # identify with nickserv
   def identify(password)
-    say_to :nickserv, "IDENTIFY #{password}"
+    say_to :nickserv, "IDENTIFY #{settings[:password]}"
   end
 
   def quit
-    send :quit, nil, "#{@quit}"
+    send :quit, nil, "#{@settings[:quit]}"
   end
 
   # listen to socket til eof
@@ -73,9 +67,9 @@ class IRC
           send :pong, nil, "#{name}"
           next
         end
-      else
-        yield str
       end
+
+      yield str
     end
   end
 

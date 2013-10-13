@@ -1,7 +1,7 @@
 module Die
 
   def trigger
-    /#{@irc.nick}\W? die/i
+    /#{@irc.settings[:nick]}\W? die/i
   end
 
   def response(str)

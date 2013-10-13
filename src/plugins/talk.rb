@@ -1,7 +1,7 @@
 module Talk
 
   def trigger
-    /hi #{@irc.nick}/i
+    /hi #{@irc.settings[:nick]}/i
   end
 
   def response(str)

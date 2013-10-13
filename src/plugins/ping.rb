@@ -1,7 +1,7 @@
 module Ping
 
   def trigger
-    /#{@irc.nick}\W? ping/i
+    /#{@irc.settings[:nick]}\W? ping/i
   end
 
   def response(str)
