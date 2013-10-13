@@ -1,21 +1,20 @@
 require_relative '../irc'
 
 module Ping
-  extend IRC
 
-  def trigger(nick)
-    /#{nick}\W* ping/i
+  def trigger(irc)
+    /#{irc.nick}\W? ping/i
   end
   module_function :trigger
 
-  def response(str)
-    args = filter(str)
-    "#{args[:nick]}: pong"
+  def response(irc, str)
+    args = IRC.filter(str)
+    irc.say "#{args[:nick]}: pong"
   end
   module_function :response
 
-  def help
-    "ping - pong"
+  def help(irc)
+    irc.say "ping - pong"
   end
   module_function :help
 

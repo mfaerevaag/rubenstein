@@ -1,21 +1,19 @@
 require_relative '../irc'
 
 module Talk
-  extend IRC
 
-  def trigger(nick)
-    /hi #{nick}/i
+  def trigger(irc)
+    /hi #{irc.nick}/i
   end
   module_function :trigger
 
-  def response(str)
-    #args = filter(str)
-    "Howdy ho!"
+  def response(irc, str)
+    irc.say "Howdy ho!"
   end
   module_function :response
 
-  def help
-    "talk - casuall conversation"
+  def help(irc)
+    irc.say "talk - casuall conversation"
   end
   module_function :help
 
