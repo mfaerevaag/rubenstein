@@ -1,6 +1,6 @@
-
 require_relative 'IRC'
 require_relative 'settings'
+require_relative 'plugin'
 require_relative 'utils/string'
 
 class Rubenstein
@@ -14,13 +14,13 @@ class Rubenstein
     @irc = IRC.new(Settings.config)
     @irc.connect
 
-    @mods = []
+    @plugins = []
 
     # load plugins
     Dir.glob(ROOT + '/src/plugins/*.rb') do |filename|
       require filename
       mod = Object.const_get(filename.split('/')[-1].sub('.rb', '').to_camel)
-      @mods << mod
+      @plugins << Plugin.new(@irc).extend(mod)
     end
   end
 
@@ -41,12 +41,12 @@ class Rubenstein
   # evaluate input with loaded modules
   def eval(str)
     # check triggers
-    @mods.each do |mod|
-      if str =~ mod.trigger(@irc) then
+    @plugins.each do |plugin|
+      if str =~ plugin.trigger then
         if str =~ / help$/i
-          mod.help(@irc)
+          plugin.help
         else
-          mod.response(@irc, str)
+          plugin.response(str)
         end
       end
     end
