@@ -24,6 +24,7 @@ class Rubenstein
     end
   end
 
+  # listen to socket til eof
   def run
     @irc.listen do |str|
       eval(str)
@@ -39,7 +40,6 @@ class Rubenstein
 
   # evaluate input with loaded modules
   def eval(str)
-    # check triggers
     @plugins.each do |plugin|
       if str =~ plugin.trigger then
         if str =~ / help$/i

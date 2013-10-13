@@ -6,7 +6,7 @@ module Die
 
   def response(str)
     args = IRC.filter(str)
-    @irc.send :quit, nil, "#{@irc.quit}"
+    @irc.quit
   end
 
   def help
