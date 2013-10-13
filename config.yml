@@ -6,3 +6,4 @@ config:
   real_name: Rubenstein
   password:  themodernprometheus # Change this!
   hello:     I'M ALIVE
+  quit:      See you in hell
