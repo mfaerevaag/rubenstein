@@ -1,4 +1,4 @@
-require_relative '../utils/random'
+require_relative '../utils/fixnum'
 
 module Nodebot
 
@@ -8,7 +8,7 @@ module Nodebot
 
   def response(str)
     args = IRC.filter(str)
-    @irc.say "Stfu #{args[:nick]}, you dumb bitch" if Random.chance(10)
+    @irc.say "Stfu #{args[:nick]}, you dumb bitch" if 10.percent_chance?
   end
 
   def help
