@@ -1,36 +1,31 @@
+
 require_relative 'IRC'
-require_relative 'Settings'
+require_relative 'settings'
+require_relative 'utils/string'
 
 class Rubenstein
-  include IRC
   include Settings
 
-  def initialize
-    root_dir = File.expand_path('..', File.dirname(__FILE__))
+  ROOT = File.expand_path('..', File.dirname(__FILE__))
 
+  def initialize
     # load settings
-    Settings.load!(root_dir + '/config.yml')
-    @server = Settings.config[:server]
-    @port = Settings.config[:port]
-    @channel = '#' + Settings.config[:channel]
-    @nick = Settings.config[:nick]
-    @real_name = Settings.config[:real_name]
-    @password = Settings.config[:password]
-    @hello = Settings.config[:hello]
+    Settings.load!(ROOT + '/config.yml')
+    @irc = IRC.new(Settings.config)
+    @irc.connect
 
     @mods = []
 
     # load plugins
-    Dir.glob(root_dir + '/src/plugins/*.rb') do |filename|
+    Dir.glob(ROOT + '/src/plugins/*.rb') do |filename|
       require filename
-      mod = Object.const_get(filename.split('/')[-1].sub('.rb', '').capitalize)
+      mod = Object.const_get(filename.split('/')[-1].sub('.rb', '').to_camel)
       @mods << mod
     end
-    puts @mods
   end
 
   def run
-    listen do |str|
+    @irc.listen do |str|
       puts str
       eval(str)
     end
@@ -38,19 +33,20 @@ class Rubenstein
 
   # check if IRC has connected with socket
   def alive?
-    @socket
+    @irc.connected?
   end
 
   private
 
+  # evaluate input with loaded modules
   def eval(str)
     # check triggers
     @mods.each do |mod|
-      if str =~ mod.trigger(@nick) then
+      if str =~ mod.trigger(@irc) then
         if str =~ / help$/i
-          say mod.help
+          mod.help(@irc)
         else
-          say mod.response(str)
+          mod.response(@irc, str)
         end
       end
     end
