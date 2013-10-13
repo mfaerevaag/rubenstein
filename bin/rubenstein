@@ -7,7 +7,6 @@
 require_relative '../src/rubenstein'
 
 rubenstein = Rubenstein.new
-rubenstein.connect
 
 if rubenstein.alive?
   begin
