@@ -26,7 +26,6 @@ class Rubenstein
 
   def run
     @irc.listen do |str|
-      puts str
       eval(str)
     end
   end

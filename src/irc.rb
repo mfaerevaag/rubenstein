@@ -2,6 +2,7 @@ require 'socket'
 
 class IRC
   attr_accessor :server, :port, :channel, :nick, :real_name, :password
+  attr_accessor :hello, :keep_alive
 
   def initialize(params)
     @server = params[:server]
@@ -11,6 +12,7 @@ class IRC
     @real_name = params[:real_name]
     @password = params[:password]
     @hello = params[:hello]
+    @keep_alive = true
   end
 
   # Connect to the IRC server
@@ -54,10 +56,14 @@ class IRC
   def listen(&block)
     until @socket.eof?
       str = @socket.gets
-      if str =~ /^PING :\w+$/
+      puts str
 
-        name = str.match(/^PING :(?<name>\w+)$/)[:name]
-        send " :#{name}"
+      if @keep_alive
+        if str =~ /PING :\w+/
+          name = str.match(/PING :(?<name>\w+)/)[:name]
+          send :pong, nil, "#{name}"
+          next
+        end
       else
         yield str
       end
