@@ -1,30 +1,42 @@
 require 'socket'
 
-module IRC
+class IRC
+  attr_accessor :server, :port, :channel, :nick, :real_name, :password
+
+  def initialize(params)
+    @server = params[:server]
+    @port = params[:port]
+    @channel = '#' + params[:channel]
+    @nick = params[:nick]
+    @real_name = params[:real_name]
+    @password = params[:password]
+    @hello = params[:hello]
+  end
 
   # Connect to the IRC server
   def connect
     @socket = TCPSocket.open(@server, @port)
-    send :user, @nick, '0', '*', @real_name
+    send :user, "#{@nick} 0 * #{@real_name}"
     send :nick, @nick
     identify @password
     send :join, @channel
     say @hello
+
+    !@socket.nil?
   end
 
-  def send(command, *args)
+  def send(command, arg, msg=nil)
     str = command.to_s.upcase + ' '
-    args.each do |arg|
-      str += arg.to_s + ' '
-    end
-    str.gsub!(/PRIVMSG #{args[0]} /, "PRIVMSG #{args[0]} :")
+    str += arg.to_s
+    str += ' :' + msg.to_s unless msg.nil?
+    #str.gsub!(/PRIVMSG #{args[0]} /, "PRIVMSG #{args[0]} :")
 
     puts "> #{str}"
     @socket.puts str
   end
 
   def say_to(recipient, msg)
-    send :privmsg, recipient.to_s, msg
+    send :privmsg, recipient, msg
   end
 
   def say(msg)
@@ -41,11 +53,23 @@ module IRC
 
   def listen(&block)
     until @socket.eof?
-      yield @socket.gets
+      str = @socket.gets
+      if str =~ /^PING :\w+$/
+
+        name = str.match(/^PING :(?<name>\w+)$/)[:name]
+        send " :#{name}"
+      else
+        yield str
+      end
     end
   end
 
-  def filter(str)
+  def connected?
+    !@socket.nil?
+  end
+
+  def self.filter(str)
     str.match(/:(?<nick>\w+)!~?(?<user>\w+)@(?<host>.+) (?<command>\w+) (?<arg>[\w#]*) ?:(?<msg>.*)/i)
   end
+
 end
