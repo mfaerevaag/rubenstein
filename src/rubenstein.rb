@@ -25,8 +25,9 @@ class Rubenstein
   end
 
   # listen to socket til eof
-  def run
+  def run(options)
     @irc.listen do |str|
+      puts str if options[:verbose]
       eval(str)
     end
   end

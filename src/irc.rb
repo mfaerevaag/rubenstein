@@ -59,7 +59,6 @@ class IRC
   def listen(&block)
     until @socket.eof?
       str = @socket.gets
-      puts str
 
       if @keep_alive
         if str =~ /PING :\w+/

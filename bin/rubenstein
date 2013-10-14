@@ -1,16 +1,25 @@
 #! /usr/bin/env ruby
 
 # The main program
-# If we get an exception, then print it out and keep going (we do NOT want
-# to disconnect unexpectedly!)
+# If we get an exception, then print it out and keep on trucking
 
+require 'optparse'
 require_relative '../src/rubenstein'
+
+options = {}
+OptionParser.new do |opts|
+  opts.banner = "Usage: rubenstein [options]"
+
+  opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
+    options[:verbose] = v
+  end
+end.parse!
 
 rubenstein = Rubenstein.new
 
 if rubenstein.alive?
   begin
-    rubenstein.run
+    rubenstein.run(verbose: options[:verbose])
   rescue Interrupt
   rescue Exception => detail
     puts detail.message()
